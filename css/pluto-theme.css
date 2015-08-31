@@ -1,0 +1,19 @@
+
+
+body{font-family:"Lato"; font-weight: bold; font-size: 20px; color: #D3D3D3 ; background-color: black; margin: 0;}
+h1{font-weight: bold; text-transform: uppercase; font-size: 40px; letter-spacing: -1px; color: #D3D3D3; line-height: 70px;text-align: right; margin: 70px 0 0 0}
+h2{font-weight: bold; text-transform: uppercase; font-size: 55px; padding: 10px; letter-spacing: -1px; color: #D3D3D3; line-height: 50px;text-align: right; margin: 55px 0 0 0}
+
+
+/* Legend title and categories*/
+h4{font-family: "Lato"; font-weight: normal; font-size: 16px; color: #D3D3D3; text-transform: uppercase; margin: 0px 0 0 0;text-align: left;}
+h5{font-family: "Lato"; font-weight: normal; font-size: 15px; color: #D3D3D3; text-transform: uppercase; margin: 20px 0 0 0;text-align: left;}
+
+p{margin: 10px 0 20px 0; line-height: 20px;text-align: justify; font-weight: normal;}
+
+.wrapper{display: block; padding: 4px 30px 0px 30px;}
+.sidepanel{background-color: black; position: absolute; top: 0; left: 0; bottom: 0; width: 35%; height: 100%; overflow: auto;}
+.map{background-color: black; position: absolute; top: 0; right: 0; bottom: 0; width: 65%; height:100%;}
+
+.cartodb-legend{width: 200px; top: 550px; right: 20px; border-color: #000000;}
+

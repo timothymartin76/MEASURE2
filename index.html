@@ -1,0 +1,2012 @@
+
+<!DOCTYPE html>
+<meta charset="utf-8">
+  <script src="lib/d3.v3.4.8.js"></script>
+  <script src="dist/dimple.v2.1.6.js"></script>
+  <script src="d3/d3.min.js"></script>
+    </head>
+	 <meta charset="utf-8">
+    <!--Edit the title of the page-->
+    <title>Building NYC</title>
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='http://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="http://libs.cartocdn.com/cartodb.js/v3/themes/css/cartodb.css" />
+    <link rel="stylesheet" href="css/pluto-theme.css">
+    <link rel="stylesheet" href="css/makeitresponsive.css">
+
+  <style>
+		 
+			 .dimple-custom-axis-label{
+				font-family: Lato !important;
+				font-size: 12px !important;
+				stroke: #808080;
+				stroke-width: 0.5;
+			  }
+	  
+			  .dimple-custom-axis-line{
+				stroke: #000000 !important;
+				stroke-width: 0;
+			 }
+			 
+			 text.dimple-tooltip {
+				font-family: Lato !important;
+				font-size: 12px !important;
+			}
+			 
+			 div.cartodb-tiles-loader{
+				position: absolute;
+				left: 43px;
+				top: -10px;
+			}
+	  
+	  
+			#chartContainer, svg {
+				width: 43%;
+				height: 40%;
+				position: fixed;
+				bottom: -10px;
+				left: 25px;
+			}		 			
+  </style> 
+ </head> 
+ <body>
+    <div class="map" id="map"></div>
+	<div class='cartodb-legend custom' style="background:transparent; border-color: transparent;">	
+		<div class="legend-title"><H4>Building Age</H4></div>
+		<ul>
+			<li>
+				<div class="bullet" style="background:#57385c"></div>
+				<H5>1750 - 1919</H5>
+			</li>
+			<li>
+				<div class="bullet" style="background:#a75265"></div>
+				<H5>1920 - 1939</H5>
+			</li>
+			<li>
+				<div class="bullet" style="background:#ec7263"></div>
+				<H5>1940 - 1959</H5>
+			</li>
+			<li>
+				<div class="bullet" style="background:#febe7e"></div>
+				<H5>1960 - 1979</H5>
+			</li>
+			<li>
+				<div class="bullet" style="background:#ffedbc"></div>
+				<H5>1980 - 1999</H5>
+			</li>
+			<li>
+				<div class="bullet" style="background:#FFFFFF"></div>
+				<H5>2000 - 2014</H5>
+			</li>
+		</ul>
+		</div>
+		
+    <div class="sidepanel">
+      <div class="wrapper">
+        <div class="context subheader">
+          <h2>The Building<br> of NYC</h2><hr>
+        </div>
+        <h1 id="headline"></h1>
+        <div id="info">    
+        </div>    
+      </div>
+  		<div id="chartContainer"></div>
+
+ <script src="https://maps.googleapis.com/maps/api/js?sensor=false&v=3.8"></script>
+    <script src="http://libs.cartocdn.com/cartodb.js/v3/cartodb.js"></script>
+ 
+
+  <script type="text/javascript">
+    var svg = dimple.newSvg("#chartContainer", 450, 300);
+    d3.csv("summarydata4.csv", function (data) {
+	
+
+      var myChart = new dimple.chart(svg, data);
+      myChart.setBounds("5%", "12%", "75%", "60%")
+      var x = myChart.addCategoryAxis("x", "Years");
+			x.title = "";				
+	        x.addOrderRule(["1900-19", "1920-39", "1940-59", "1960-79", "1980-99", "2000-14"]);
+
+	   var y = myChart.addMeasureAxis("y", "New Buildings");
+		  y.showGridlines = false;
+	      y.hidden = true;
+		  y.tickFormat = ',4g';
+		  y.title = "";
+	  var s =	myChart.addSeries("Years", dimple.plot.bar);
+	  
+ // Set small margins as there is going to be no axes displayed
+     <!-- myChart.setMargins("10%", "10%", "10%", "10%"); -->
+
+	  var c = new dimple.chart(svg, data);
+		c.draw();
+	  
+	      myChart.assignColor("1900-19", "#57385C", "#57385C", 0.9);
+		  myChart.assignColor("1920-39", "#A75265", "#A75265", 0.9);
+		  myChart.assignColor("1940-59", "#EC7263", "#EC7263", 0.9);
+		  myChart.assignColor("1960-79", "#FEBE7E", "#FEBE7E", 0.8);
+		  myChart.assignColor("1980-99", "#FFEDBC", "#FFEDBC", 0.8);
+		  myChart.assignColor("2000-14", "#FFF", "#FFF", 0.8);	  
+	  
+      myChart.draw();
+	  
+// Add a title with some d3
+		svg.append("text")
+		   .attr("x", c._xPixels() + c._widthPixels() / 1.8)
+		   .attr("y", c._yPixels() + 100)
+		   .style("text-anchor", "middle")
+		   .style("font-family", "Lato")
+		   .style("font-size", "14px")
+		   .style("font-weight", "bold")
+		   .style("fill", "#D3D3D3")
+		   .text("NUMBER OF NEW BUILDINGS")	  	  
+	  
+	   s.shapes.each(function(d) {
+            var shape = d3.select(this);
+            svg.append("text")
+            .attr("x", parseFloat(shape.attr("x")) + parseFloat(shape.attr("width"))/2)
+            .attr("y", y._scale(d.height))
+            .attr("dy", "-1em")
+            .style("text-anchor", "middle")
+            .style("font-size", "12px")
+			.style("fill", "#A8A8A8")
+            .style("font-family", "Open Sans")
+            .style("font-weight", "500")  
+            .text(d3.format(",1f")(d.yValue));
+	  
+	  });   	  	  
+    });
+  </script>
+  
+    <script type="text/javascript">
+		
+	
+	
+      var last = 0;
+      var next = 0;
+      var pause = 670;
+      var map = new L.Map('map', {
+        center: [40.740044, -73.983554],
+        zoom: 14,
+		zoomControl: false,
+        minZoom: 14,
+        maxZoom: 14
+      });
+      var nextTimer;
+      var running = false;
+      var loader = new cdb.geo.ui.TilesLoader({ template: function(){ return '<div class="loader"></div>' } });
+      $('#map').append(loader.render().el);
+	  
+	  
+      var move = function(){
+        if(tour[last]){
+            if (tour[last]['layer']){
+                tour[last]['layer'].hide()
+            }
+            if (tour[next].xy != tour[last].xy){
+                map.panTo(tour[next].xy)
+            }
+            if (tour[next].z != map.getZoom()){
+                map.setZoom(tour[next].z)
+            }
+        }
+
+        $('#headline').html(tour[next].headline);
+        $('#info').html(tour[next].info);
+
+        window.location.hash = "#"+next;  
+				
+
+        function addLoader(layer) {
+          layer.bind('loading', function() { loader.show() });
+          layer.bind('load',  function() { loader.hide(); });
+        }
+
+
+        if (tour[next]['layer']){
+            tour[next]['layer'].show()
+            last = next;
+            next+=1;
+            if (next == tour.length) next = 0;
+            nextTimer = setTimeout(move, pause);
+        } else {
+            cartodb.createLayer(map, tour[next].viz)
+                .addTo(map)
+                .on('done', function(layer) {
+                    addLoader(layer);
+                    // console.log(viz)
+                    // console.log(viz.getSubLayer(0))
+                    if (tour[next].options){
+                        if (tour[next].options[0].sql){
+                            layer.setQuery(tour[next].options[0].sql)
+                        }
+                        if (tour[next].options[0].cartocss){
+                            layer.setCartoCSS(tour[next].options[0].cartocss)
+                        }
+                    }
+                    tour[next]['layer'] = layer;
+                    last = next;
+                    next+=1;
+                    if (next == tour.length) next = 0;
+                    nextTimer = setTimeout(move, pause);
+                })
+                .on('error',function(){        
+                    last = next;
+                    next+=1;
+                    if (next == tour.length) next = 0;
+                    nextTimer = setTimeout(move, 100);
+                });
+        }
+      }
+
+      var tour = [
+        {
+            headline: "1900", 
+            info: "<p><b>1900-19</b>:  NYC population increases by 60%.  Residential development continues to surge in lower Manhattan.<p>",  
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                    cartocss: "#layer{[ yearbuilt <= 1900]{polygon-fill: #57385C;}[ yearbuilt >= 1901]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+
+        {
+            headline: "1901", 
+            info: "<p><b>1900-19</b>:  NYC population increases by 60%.  Residential development continues to surge in lower Manhattan.<p>",    
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1901]{polygon-fill: #57385C;}[ yearbuilt >= 1902]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+
+       {
+            headline: "1902", 
+            info: "<p><b>1900-19</b>:  NYC population increases by 60%.  Residential development continues to surge in lower Manhattan.<p>",     
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1902]{polygon-fill: #57385C;}[ yearbuilt >= 1903]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+
+        {
+            headline: "1903", 
+            info: "<p><b>1900-19</b>:  NYC population increases by 60%.  Residential development continues to surge in lower Manhattan.<p>",    
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                    cartocss: "#layer{[ yearbuilt <= 1903]{polygon-fill: #57385C;}[ yearbuilt >= 1904]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+      {
+            headline: "1904", 
+            info: "<p><b>1900-19</b>:  NYC population increases by 60%.  Residential development continues to surge in lower Manhattan.<p>",      
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1904]{polygon-fill: #57385C;}[ yearbuilt >= 1905]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+
+      {
+            headline: "1905", 
+            info: "<p><b>1900-19</b>:  NYC population increases by 60%.  Residential development continues to surge in lower Manhattan.<p>",    
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1905]{polygon-fill: #57385C;}[ yearbuilt >= 1906]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+
+      {
+            headline: "1906", 
+            info: "<p><b>1900-19</b>:  NYC population increases by 60%.  Residential development continues to surge in lower Manhattan.<p>",     
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1906]{polygon-fill: #57385C;}[ yearbuilt >= 1907]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+
+      {
+            headline: "1907", 
+            info: "<p><b>1900-19</b>:  NYC population increases by 60%.  Residential development continues to surge in lower Manhattan.<p>",   
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1907]{polygon-fill: #57385C;}[ yearbuilt >= 1908]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+
+      {
+            headline: "1908", 
+            info: "<p><b>1900-19</b>:  NYC population increases by 60%.  Residential development continues to surge in lower Manhattan.<p>",   
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1908]{polygon-fill: #57385C;}[ yearbuilt >= 1909]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+
+       {
+            headline: "1909", 
+            info: "<p><b>1900-19</b>:  NYC population increases by 60%.  Residential development continues to surge in lower Manhattan.<p>",   
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1909]{polygon-fill: #57385C;}[ yearbuilt >= 1910]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+      {
+            headline: "1910", 
+            info: "<p><b>1900-19</b>:  NYC population increases by 60%.  Residential development continues to surge in lower Manhattan.<p>",   
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1910]{polygon-fill: #57385C;}[ yearbuilt >= 1911]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+      {
+            headline: "1911", 
+            info: "<p><b>1900-19</b>:  NYC population increases by 60%.  Residential development continues to surge in lower Manhattan.<p>",   
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1911]{polygon-fill: #57385C;}[ yearbuilt >= 1912]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+      {
+            headline: "1912", 
+            info: "<p><b>1900-19</b>:  NYC population increases by 60%.  Residential development continues to surge in lower Manhattan.<p>",     
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1912]{polygon-fill: #57385C;}[ yearbuilt >= 1913]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+      {
+            headline: "1913", 
+            info: "<p><b>1900-19</b>:  NYC population increases by 60%.  Residential development continues to surge in lower Manhattan.<p>",    
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1913]{polygon-fill: #57385C;}[ yearbuilt >= 1914]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+     {
+            headline: "1914", 
+            info: "<p><b>1900-19</b>:  NYC population increases by 60%.  Residential development continues to surge in lower Manhattan.<p>",    
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1914]{polygon-fill: #57385C;}[ yearbuilt >= 1915]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+
+       {
+            headline: "1915", 
+            info: "<p><b>1900-19</b>:  NYC population increases by 60%.  Residential development continues to surge in lower Manhattan.<p>",  
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1915]{polygon-fill: #57385C;}[ yearbuilt >= 1916]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+
+        {
+            headline: "1916", 
+            info: "<p><b>1900-19</b>:  NYC population increases by 60%.  Residential development continues to surge in lower Manhattan.<p>",    
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1916]{polygon-fill: #57385C;}[ yearbuilt >= 1917]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+
+        {
+            headline: "1917", 
+            info: "<p><b>1900-19</b>:  NYC population increases by 60%.  Residential development continues to surge in lower Manhattan.<p>",    
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1917]{polygon-fill: #57385C;}[ yearbuilt >= 1918]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+
+        {
+            headline: "1918",
+            info: "<p><b>1900-19</b>:  NYC population increases by 60%.  Residential development continues to surge in lower Manhattan.<p>",   
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1918]{polygon-fill: #57385C;}[ yearbuilt >= 1919]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+
+       {
+            headline: "1919",
+            info: "<p><b>1900-19</b>:  NYC population increases by 60%.  Residential development continues to surge in lower Manhattan.<p>",    
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1919]{polygon-fill: #57385C;}[ yearbuilt >= 1920]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+
+       {
+            headline: "1920",
+            info: "<p><b>1920-39</b>:  Economic boom of the 20s gives rise to midtown skyscrapers such as the Chrysler Building and Empire State Building. This is followed by the Great Depression-era housing crisis in the 30s.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1920]{polygon-fill: #57385C;} [ yearbuilt <= 1920] [ yearbuilt > 1919] {polygon-fill: #A75265;} [ yearbuilt >= 1921]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1921",
+            info: "<p><b>1920-39</b>:  Economic boom of the 20s gives rise to midtown skyscrapers such as the Chrysler Building and Empire State Building. This is followed by the Great Depression-era housing crisis in the 30s.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1920]{polygon-fill: #57385C;} [ yearbuilt <= 1921] [ yearbuilt > 1919] {polygon-fill: #A75265;} [ yearbuilt >= 1922]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		
+		
+		
+		
+		 {
+            headline: "1922",
+            info: "<p><b>1920-39</b>:  Economic boom of the 20s gives rise to midtown skyscrapers such as the Chrysler Building and Empire State Building. This is followed by the Great Depression-era housing crisis in the 30s.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1920]{polygon-fill: #57385C;} [ yearbuilt <= 1922] [ yearbuilt > 1919] {polygon-fill: #A75265;} [ yearbuilt >= 1923]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,			
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1923",
+            info: "<p><b>1920-39</b>:  Economic boom of the 20s gives rise to midtown skyscrapers such as the Chrysler Building and Empire State Building. This is followed by the Great Depression-era housing crisis in the 30s.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1920]{polygon-fill: #57385C;} [ yearbuilt <= 1923] [ yearbuilt > 1919] {polygon-fill: #A75265;} [ yearbuilt >= 1924]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1924",
+            info: "<p><b>1920-39</b>:  Economic boom of the 20s gives rise to midtown skyscrapers such as the Chrysler Building and Empire State Building. This is followed by the Great Depression-era housing crisis in the 30s.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1920]{polygon-fill: #57385C;} [ yearbuilt <= 1924] [ yearbuilt > 1919] {polygon-fill: #A75265;} [ yearbuilt >= 1925]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1925",
+            info: "<p><b>1920-39</b>:  Economic boom of the 20s gives rise to midtown skyscrapers such as the Chrysler Building and Empire State Building. This is followed by the Great Depression-era housing crisis in the 30s.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1920]{polygon-fill: #57385C;} [ yearbuilt <= 1925] [ yearbuilt > 1919] {polygon-fill: #A75265;} [ yearbuilt >= 1926]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1926",
+            info: "<p><b>1920-39</b>:  Economic boom of the 20s gives rise to midtown skyscrapers such as the Chrysler Building and Empire State Building. This is followed by the Great Depression-era housing crisis in the 30s.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1920]{polygon-fill: #57385C;} [ yearbuilt <= 1926] [ yearbuilt > 1919] {polygon-fill: #A75265;} [ yearbuilt >= 1927]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1927",
+            info: "<p><b>1920-39</b>:  Economic boom of the 20s gives rise to midtown skyscrapers such as the Chrysler Building and Empire State Building. This is followed by the Great Depression-era housing crisis in the 30s.<p>",  
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1920]{polygon-fill: #57385C;} [ yearbuilt <= 1927] [ yearbuilt > 1919] {polygon-fill: #A75265;} [ yearbuilt >= 1928]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1928",
+            info: "<p><b>1920-39</b>:  Economic boom of the 20s gives rise to midtown skyscrapers such as the Chrysler Building and Empire State Building. This is followed by the Great Depression-era housing crisis in the 30s.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+		options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1920]{polygon-fill: #57385C;} [ yearbuilt <= 1928] [ yearbuilt > 1919] {polygon-fill: #A75265;} [ yearbuilt >= 1929]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1929",
+            info: "<p><b>1920-39</b>:  Economic boom of the 20s gives rise to midtown skyscrapers such as the Chrysler Building and Empire State Building. This is followed by the Great Depression-era housing crisis in the 30s.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1920]{polygon-fill: #57385C;} [ yearbuilt <= 1929] [ yearbuilt > 1919] {polygon-fill: #A75265;} [ yearbuilt >= 1930]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1930",
+            info: "<p><b>1920-39</b>:  Economic boom of the 20s gives rise to midtown skyscrapers such as the Chrysler Building and Empire State Building. This is followed by the Great Depression-era housing crisis in the 30s.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1920]{polygon-fill: #57385C;} [ yearbuilt <= 1930] [ yearbuilt > 1919] {polygon-fill: #A75265;} [ yearbuilt >= 1931]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1931",
+            info: "<p><b>1920-39</b>:  Economic boom of the 20s gives rise to midtown skyscrapers such as the Chrysler Building and Empire State Building. This is followed by the Great Depression-era housing crisis in the 30s.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1920]{polygon-fill: #57385C;} [ yearbuilt <= 1931] [ yearbuilt > 1919] {polygon-fill: #A75265;} [ yearbuilt >= 1932]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1932",
+            info: "<p><b>1920-39</b>:  Economic boom of the 20s gives rise to midtown skyscrapers such as the Chrysler Building and Empire State Building. This is followed by the Great Depression-era housing crisis in the 30s.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1920]{polygon-fill: #57385C;} [ yearbuilt <= 1932] [ yearbuilt > 1919] {polygon-fill: #A75265;} [ yearbuilt >= 1933]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1933",
+            info: "<p><b>1920-39</b>:  Economic boom of the 20s gives rise to midtown skyscrapers such as the Chrysler Building and Empire State Building. This is followed by the Great Depression-era housing crisis in the 30s.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1920]{polygon-fill: #57385C;} [ yearbuilt <= 1933] [ yearbuilt > 1919] {polygon-fill: #A75265;} [ yearbuilt >= 1934]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1934",
+            info: "<p><b>1920-39</b>:  Economic boom of the 20s gives rise to midtown skyscrapers such as the Chrysler Building and Empire State Building. This is followed by the Great Depression-era housing crisis in the 30s.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1920]{polygon-fill: #57385C;} [ yearbuilt <= 1934] [ yearbuilt > 1919] {polygon-fill: #A75265;} [ yearbuilt >= 1935]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1935",
+            info: "<p><b>1920-39</b>:  Economic boom of the 20s gives rise to midtown skyscrapers such as the Chrysler Building and Empire State Building. This is followed by the Great Depression-era housing crisis in the 30s.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1920]{polygon-fill: #57385C;} [ yearbuilt <= 1935] [ yearbuilt > 1919] {polygon-fill: #A75265;} [ yearbuilt >= 1936]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1936",
+            info: "<p><b>1920-39</b>:  Economic boom of the 20s gives rise to midtown skyscrapers such as the Chrysler Building and Empire State Building. This is followed by the Great Depression-era housing crisis in the 30s.<p>",  
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1920]{polygon-fill: #57385C;} [ yearbuilt <= 1936] [ yearbuilt > 1919] {polygon-fill: #A75265;} [ yearbuilt >= 1937]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1937",
+            info: "<p><b>1920-39</b>:  Economic boom of the 20s gives rise to midtown skyscrapers such as the Chrysler Building and Empire State Building. This is followed by the Great Depression-era housing crisis in the 30s.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1920]{polygon-fill: #57385C;} [ yearbuilt <= 1937] [ yearbuilt > 1919] {polygon-fill: #A75265;} [ yearbuilt >= 1938]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1938",
+            info: "<p><b>1920-39</b>:  Economic boom of the 20s gives rise to midtown skyscrapers such as the Chrysler Building and Empire State Building. This is followed by the Great Depression-era housing crisis in the 30s.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+		options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1920]{polygon-fill: #57385C;} [ yearbuilt <= 1938] [ yearbuilt > 1919] {polygon-fill: #A75265;} [ yearbuilt >= 1939]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1939",
+            info: "<p><b>1920-39</b>:  Economic boom of the 20s gives rise to midtown skyscrapers such as the Chrysler Building and Empire State Building. This is followed by the Great Depression-era housing crisis in the 30’.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[ yearbuilt <= 1920]{polygon-fill: #57385C;} [ yearbuilt <= 1939] [ yearbuilt > 1919] {polygon-fill: #A75265;} [ yearbuilt >= 1940]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1940",
+            info: "<p><b>1940-59</b>:  Post-war veterans and immigrants create a sharp demand in housing. Several large-scale public housing projects are developed along the East River including Stuyvesant Town. Midtown sees a boom in construction of glass and steel office towers.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1940][yearbuilt > 1939]{polygon-fill: #EC7263;}[yearbuilt >= 1941]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1941",
+            info: "<p><b>1940-59</b>:  Post-war veterans and immigrants create a sharp demand in housing. Several large-scale public housing projects are developed along the East River including Stuyvesant Town. Midtown sees a boom in construction of glass and steel office towers.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1941][yearbuilt > 1939]{polygon-fill: #EC7263;}[yearbuilt >= 1942]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1942",
+            info: "<p><b>1940-59</b>:  Post-war veterans and immigrants create a sharp demand in housing. Several large-scale public housing projects are developed along the East River including Stuyvesant Town. Midtown sees a boom in construction of glass and steel office towers.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1942][yearbuilt > 1939]{polygon-fill: #EC7263;}[yearbuilt >= 1943]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1943",
+            info: "<p><b>1940-59</b>:  Post-war veterans and immigrants create a sharp demand in housing. Several large-scale public housing projects are developed along the East River including Stuyvesant Town. Midtown sees a boom in construction of glass and steel office towers.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1943][yearbuilt > 1939]{polygon-fill: #EC7263;}[yearbuilt >= 1944]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1944",
+            info: "<p><b>1940-59</b>:  Post-war veterans and immigrants create a sharp demand in housing. Several large-scale public housing projects are developed along the East River including Stuyvesant Town. Midtown sees a boom in construction of glass and steel office towers.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1944][yearbuilt > 1939]{polygon-fill: #EC7263;}[yearbuilt >= 1945]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1945",
+            info: "<p><b>1940-59</b>:  Post-war veterans and immigrants create a sharp demand in housing. Several large-scale public housing projects are developed along the East River including Stuyvesant Town. Midtown sees a boom in construction of glass and steel office towers.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1945][yearbuilt > 1939]{polygon-fill: #EC7263;}[yearbuilt >= 1946]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1946",
+            info: "<p><b>1940-59</b>:  Post-war veterans and immigrants create a sharp demand in housing. Several large-scale public housing projects are developed along the East River including Stuyvesant Town. Midtown sees a boom in construction of glass and steel office towers.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1946][yearbuilt > 1939]{polygon-fill: #EC7263;}[yearbuilt >= 1947]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1947",
+            info: "<p><b>1940-59</b>:  Post-war veterans and immigrants create a sharp demand in housing. Several large-scale public housing projects are developed along the East River including Stuyvesant Town. Midtown sees a boom in construction of glass and steel office towers.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1947][yearbuilt > 1939]{polygon-fill: #EC7263;}[yearbuilt >= 1948]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1948",
+            info: "<p><b>1940-59</b>:  Post-war veterans and immigrants create a sharp demand in housing. Several large-scale public housing projects are developed along the East River including Stuyvesant Town. Midtown sees a boom in construction of glass and steel office towers.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1948][yearbuilt > 1939]{polygon-fill: #EC7263;}[yearbuilt >= 1949]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1949",
+            info: "<p><b>1940-59</b>:  Post-war veterans and immigrants create a sharp demand in housing. Several large-scale public housing projects are developed along the East River including Stuyvesant Town. Midtown sees a boom in construction of glass and steel office towers.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1949][yearbuilt > 1939]{polygon-fill: #EC7263;}[yearbuilt >= 1950]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1950",
+            info: "<p><b>1940-59</b>:  Post-war veterans and immigrants create a sharp demand in housing. Several large-scale public housing projects are developed along the East River including Stuyvesant Town. Midtown sees a boom in construction of glass and steel office towers.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1950][yearbuilt > 1939]{polygon-fill: #EC7263;}[yearbuilt >= 1951]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1951",
+            info: "<p><b>1940-59</b>:  Post-war veterans and immigrants create a sharp demand in housing. Several large-scale public housing projects are developed along the East River including Stuyvesant Town. Midtown sees a boom in construction of glass and steel office towers.<p>",  
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1951][yearbuilt > 1939]{polygon-fill: #EC7263;}[yearbuilt >= 1952]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1952",
+            info: "<p><b>1940-59</b>:  Post-war veterans and immigrants create a sharp demand in housing. Several large-scale public housing projects are developed along the East River including Stuyvesant Town. Midtown sees a boom in construction of glass and steel office towers.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1952][yearbuilt > 1939]{polygon-fill: #EC7263;}[yearbuilt >= 1953]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1953",
+            info: "<p><b>1940-59</b>:  Post-war veterans and immigrants create a sharp demand in housing. Several large-scale public housing projects are developed along the East River including Stuyvesant Town. Midtown sees a boom in construction of glass and steel office towers.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1953][yearbuilt > 1939]{polygon-fill: #EC7263;}[yearbuilt >= 1954]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1954",
+            info: "<p><b>1940-59</b>:  Post-war veterans and immigrants create a sharp demand in housing. Several large-scale public housing projects are developed along the East River including Stuyvesant Town. Midtown sees a boom in construction of glass and steel office towers.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1954][yearbuilt > 1939]{polygon-fill: #EC7263;}[yearbuilt >= 1955]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1955",
+            info: "<p><b>1940-59</b>:  Post-war veterans and immigrants create a sharp demand in housing. Several large-scale public housing projects are developed along the East River including Stuyvesant Town. Midtown sees a boom in construction of glass and steel office towers.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1955][yearbuilt > 1939]{polygon-fill: #EC7263;}[yearbuilt >= 1956]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1956",
+            info: "<p><b>1940-59</b>:  Post-war veterans and immigrants create a sharp demand in housing. Several large-scale public housing projects are developed along the East River including Stuyvesant Town. Midtown sees a boom in construction of glass and steel office towers.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1956][yearbuilt > 1939]{polygon-fill: #EC7263;}[yearbuilt >= 1957]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1957",
+            info: "<p><b>1940-59</b>:  Post-war veterans and immigrants create a sharp demand in housing. Several large-scale public housing projects are developed along the East River including Stuyvesant Town. Midtown sees a boom in construction of glass and steel office towers.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1957][yearbuilt > 1939]{polygon-fill: #EC7263;}[yearbuilt >= 1958]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1958",
+            info: "<p><b>1940-59</b>:  Post-war veterans and immigrants create a sharp demand in housing. Several large-scale public housing projects are developed along the East River including Stuyvesant Town. Midtown sees a boom in construction of glass and steel office towers.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1958][yearbuilt > 1939]{polygon-fill: #EC7263;}[yearbuilt >= 1959]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1959",
+            info: "<p><b>1940-59</b>:  Post-war veterans and immigrants create a sharp demand in housing. Several large-scale public housing projects are developed along the East River including Stuyvesant Town. Midtown sees a boom in construction of glass and steel office towers.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1959][yearbuilt > 1939]{polygon-fill: #EC7263;}[yearbuilt >= 1960]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1960",
+            info: "<p><b>1960-79</b>:  Population growth flattens as the post-war population shifts to the suburbs. Economic and social decay sets in. Additional large-scale NYCHA buildings are constructed along the East River, as well as affordable housing developments on Roosevelt Island.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1960][yearbuilt > 1959]{polygon-fill: #FEBE7E;}[yearbuilt >= 1961]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1961",
+            info: "<p><b>1960-79</b>:  Population growth flattens as the post-war population shifts to the suburbs. Economic and social decay sets in. Additional large-scale NYCHA buildings are constructed along the East River, as well as affordable housing developments on Roosevelt Island.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1961][yearbuilt > 1959]{polygon-fill: #FEBE7E;}[yearbuilt >= 1962]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1962",
+            info: "<p><b>1960-79</b>:  Population growth flattens as the post-war population shifts to the suburbs. Economic and social decay sets in. Additional large-scale NYCHA buildings are constructed along the East River, as well as affordable housing developments on Roosevelt Island.<p>",  
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1962][yearbuilt > 1959]{polygon-fill: #FEBE7E;}[yearbuilt >= 1963]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1963",
+            info: "<p><b>1960-79</b>:  Population growth flattens as the post-war population shifts to the suburbs. Economic and social decay sets in. Additional large-scale NYCHA buildings are constructed along the East River, as well as affordable housing developments on Roosevelt Island.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1963][yearbuilt > 1959]{polygon-fill: #FEBE7E;}[yearbuilt >= 1964]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1964",
+            info: "<p><b>1960-79</b>:  Population growth flattens as the post-war population shifts to the suburbs. Economic and social decay sets in. Additional large-scale NYCHA buildings are constructed along the East River, as well as affordable housing developments on Roosevelt Island.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1964][yearbuilt > 1959]{polygon-fill: #FEBE7E;}[yearbuilt >= 1965]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1965",
+            info: "<p><b>1960-79</b>:  Population growth flattens as the post-war population shifts to the suburbs. Economic and social decay sets in. Additional large-scale NYCHA buildings are constructed along the East River, as well as affordable housing developments on Roosevelt Island.<p>",  
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1965][yearbuilt > 1959]{polygon-fill: #FEBE7E;}[yearbuilt >= 1966]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1966",
+            info: "<p><b>1960-79</b>:  Population growth flattens as the post-war population shifts to the suburbs. Economic and social decay sets in. Additional large-scale NYCHA buildings are constructed along the East River, as well as affordable housing developments on Roosevelt Island.<p>",  
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1966][yearbuilt > 1959]{polygon-fill: #FEBE7E;}[yearbuilt >= 1967]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1967",
+            info: "<p><b>1960-79</b>:  Population growth flattens as the post-war population shifts to the suburbs. Economic and social decay sets in. Additional large-scale NYCHA buildings are constructed along the East River, as well as affordable housing developments on Roosevelt Island.<p>",  
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1967][yearbuilt > 1959]{polygon-fill: #FEBE7E;}[yearbuilt >= 1968]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1968",
+            info: "<p><b>1960-79</b>:  Population growth flattens as the post-war population shifts to the suburbs. Economic and social decay sets in. Additional large-scale NYCHA buildings are constructed along the East River, as well as affordable housing developments on Roosevelt Island.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1968][yearbuilt > 1959]{polygon-fill: #FEBE7E;}[yearbuilt >= 1969]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1969",
+            info: "<p><b>1960-79</b>:  Population growth flattens as the post-war population shifts to the suburbs. Economic and social decay sets in. Additional large-scale NYCHA buildings are constructed along the East River, as well as affordable housing developments on Roosevelt Island.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1969][yearbuilt > 1959]{polygon-fill: #FEBE7E;}[yearbuilt >= 1970]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1970",
+            info: "<p><b>1960-79</b>:  Population growth flattens as the post-war population shifts to the suburbs. Economic and social decay sets in. Additional large-scale NYCHA buildings are constructed along the East River, as well as affordable housing developments on Roosevelt Island.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1970][yearbuilt > 1959]{polygon-fill: #FEBE7E;}[yearbuilt >= 1971]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1971",
+            info: "<p><b>1960-79</b>:  Population growth flattens as the post-war population shifts to the suburbs. Economic and social decay sets in. Additional large-scale NYCHA buildings are constructed along the East River, as well as affordable housing developments on Roosevelt Island.<p>",  
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1971][yearbuilt > 1959]{polygon-fill: #FEBE7E;}[yearbuilt >= 1972]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1972",
+            info: "<p><b>1960-79</b>:  Population growth flattens as the post-war population shifts to the suburbs. Economic and social decay sets in. Additional large-scale NYCHA buildings are constructed along the East River, as well as affordable housing developments on Roosevelt Island.<p>",  
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1972][yearbuilt > 1959]{polygon-fill: #FEBE7E;}[yearbuilt >= 1973]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1973",
+            info: "<p><b>1960-79</b>:  Population growth flattens as the post-war population shifts to the suburbs. Economic and social decay sets in. Additional large-scale NYCHA buildings are constructed along the East River, as well as affordable housing developments on Roosevelt Island.<p>",  
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1973][yearbuilt > 1959]{polygon-fill: #FEBE7E;}[yearbuilt >= 1974]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1974",
+            info: "<p><b>1960-79</b>:  Population growth flattens as the post-war population shifts to the suburbs. Economic and social decay sets in. Additional large-scale NYCHA buildings are constructed along the East River, as well as affordable housing developments on Roosevelt Island.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1974][yearbuilt > 1959]{polygon-fill: #FEBE7E;}[yearbuilt >= 1975]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1975",
+            info: "<p><b>1960-79</b>:  Population growth flattens as the post-war population shifts to the suburbs. Economic and social decay sets in. Additional large-scale NYCHA buildings are constructed along the East River, as well as affordable housing developments on Roosevelt Island.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1975][yearbuilt > 1959]{polygon-fill: #FEBE7E;}[yearbuilt >= 1976]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1976",
+            info: "<p><b>1960-79</b>:  Population growth flattens as the post-war population shifts to the suburbs. Economic and social decay sets in. Additional large-scale NYCHA buildings are constructed along the East River, as well as affordable housing developments on Roosevelt Island.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1976][yearbuilt > 1959]{polygon-fill: #FEBE7E;}[yearbuilt >= 1977]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1977",
+            info: "<p><b>1960-79</b>:  Population growth flattens as the post-war population shifts to the suburbs. Economic and social decay sets in. Additional large-scale NYCHA buildings are constructed along the East River, as well as affordable housing developments on Roosevelt Island.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1977][yearbuilt > 1959]{polygon-fill: #FEBE7E;}[yearbuilt >= 1978]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1978",
+            info: "<p><b>1960-79</b>:  Population growth flattens as the post-war population shifts to the suburbs. Economic and social decay sets in. Additional large-scale NYCHA buildings are constructed along the East River, as well as affordable housing developments on Roosevelt Island.<p>",  
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1978][yearbuilt > 1959]{polygon-fill: #FEBE7E;}[yearbuilt >= 1979]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1979",
+            info: "<p><b>1960-79</b>:  Population growth flattens as the post-war population shifts to the suburbs. Economic and social decay sets in. Additional large-scale NYCHA buildings are constructed along the East River, as well as affordable housing developments on Roosevelt Island.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1979][yearbuilt > 1959]{polygon-fill: #FEBE7E;}[yearbuilt >= 1980]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1980",
+            info: "<p><b>1980-99</b>:  The economy and Wall Street rise and fall in the 80s. Restrained optimism leads to few large developments with some exceptions such as the Trump Tower in 1983.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 1980][yearbuilt > 1979]{polygon-fill: #FFEDBC;}[yearbuilt >= 1981]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1981",
+            info: "<p><b>1980-99</b>:  The economy and Wall Street rise and fall in the 80s. Restrained optimism leads to few large developments with some exceptions such as the Trump Tower in 1983.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 1981][yearbuilt > 1979]{polygon-fill: #FFEDBC;}[yearbuilt >= 1982]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1982",
+            info: "<p><b>1980-99</b>:  The economy and Wall Street rise and fall in the 80s. Restrained optimism leads to few large developments with some exceptions such as the Trump Tower in 1983.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 1982][yearbuilt > 1979]{polygon-fill: #FFEDBC;}[yearbuilt >= 1983]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1983",
+            info: "<p><b>1980-99</b>:  The economy and Wall Street rise and fall in the 80s. Restrained optimism leads to few large developments with some exceptions such as the Trump Tower in 1983.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 1983][yearbuilt > 1979]{polygon-fill: #FFEDBC;}[yearbuilt >= 1984]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1984",
+            info: "<p><b>1980-99</b>:  The economy and Wall Street rise and fall in the 80s. Restrained optimism leads to few large developments with some exceptions such as the Trump Tower in 1983.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 1984][yearbuilt > 1979]{polygon-fill: #FFEDBC;}[yearbuilt >= 1985]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1985",
+            info: "<p><b>1980-99</b>:  The economy and Wall Street rise and fall in the 80s. Restrained optimism leads to few large developments with some exceptions such as the Trump Tower in 1983.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 1985][yearbuilt > 1979]{polygon-fill: #FFEDBC;}[yearbuilt >= 1986]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1986",
+            info: "<p><b>1980-99</b>:  The economy and Wall Street rise and fall in the 80s. Restrained optimism leads to few large developments with some exceptions such as the Trump Tower in 1983.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 1986][yearbuilt > 1979]{polygon-fill: #FFEDBC;}[yearbuilt >= 1987]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1987",
+            info: "<p><b>1980-99</b>:  The economy and Wall Street rise and fall in the 80s. Restrained optimism leads to few large developments with some exceptions such as the Trump Tower in 1983.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 1987][yearbuilt > 1979]{polygon-fill: #FFEDBC;}[yearbuilt >= 1988]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1988",
+            info: "<p><b>1980-99</b>:  The economy and Wall Street rise and fall in the 80s. Restrained optimism leads to few large developments with some exceptions such as the Trump Tower in 1983.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 1988][yearbuilt > 1979]{polygon-fill: #FFEDBC;}[yearbuilt >= 1989]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1989",
+            info: "<p><b>1980-99</b>:  The economy and Wall Street rise and fall in the 80s. Restrained optimism leads to few large developments with some exceptions such as the Trump Tower in 1983.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 1989][yearbuilt > 1979]{polygon-fill: #FFEDBC;}[yearbuilt >= 1990]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1990",
+            info: "<p><b>1980-99</b>:  The economy and Wall Street rise and fall in the 80s. Restrained optimism leads to few large developments with some exceptions such as the Trump Tower in 1983.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 1990][yearbuilt > 1979]{polygon-fill: #FFEDBC;}[yearbuilt >= 1991]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1991",
+            info: "<p><b>1980-99</b>:  The economy and Wall Street rise and fall in the 80s. Restrained optimism leads to few large developments with some exceptions such as the Trump Tower in 1983.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 1991][yearbuilt > 1979]{polygon-fill: #FFEDBC;}[yearbuilt >= 1992]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1992",
+            info: "<p><b>1980-99</b>:  The economy and Wall Street rise and fall in the 80s. Restrained optimism leads to few large developments with some exceptions such as the Trump Tower in 1983.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 1992][yearbuilt > 1979]{polygon-fill: #FFEDBC;}[yearbuilt >= 1993]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1993",
+            info: "<p><b>1980-99</b>:  The economy and Wall Street rise and fall in the 80s. Restrained optimism leads to few large developments with some exceptions such as the Trump Tower in 1983.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 1993][yearbuilt > 1979]{polygon-fill: #FFEDBC;}[yearbuilt >= 1994]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1994",
+            info: "<p><b>1980-99</b>:  The economy and Wall Street rise and fall in the 80s. Restrained optimism leads to few large developments with some exceptions such as the Trump Tower in 1983.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 1994][yearbuilt > 1979]{polygon-fill: #FFEDBC;}[yearbuilt >= 1995]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1995",
+            info: "<p><b>1980-99</b>:  The economy and Wall Street rise and fall in the 80s. Restrained optimism leads to few large developments with some exceptions such as the Trump Tower in 1983.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 1995][yearbuilt > 1979]{polygon-fill: #FFEDBC;}[yearbuilt >= 1996]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1996",
+            info: "<p><b>1980-99</b>:  The economy and Wall Street rise and fall in the 80s. Restrained optimism leads to few large developments with some exceptions such as the Trump Tower in 1983.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 1996][yearbuilt > 1979]{polygon-fill: #FFEDBC;}[yearbuilt >= 1997]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1997",
+            info: "<p><b>1980-99</b>:  The economy and Wall Street rise and fall in the 80s. Restrained optimism leads to few large developments with some exceptions such as the Trump Tower in 1983.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 1997][yearbuilt > 1979]{polygon-fill: #FFEDBC;}[yearbuilt >= 1998]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1998",
+            info: "<p><b>1980-99</b>:  The economy and Wall Street rise and fall in the 80s. Restrained optimism leads to few large developments with some exceptions such as the Trump Tower in 1983.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 1998][yearbuilt > 1979]{polygon-fill: #FFEDBC;}[yearbuilt >= 1999]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "1999",
+            info: "<p><b>1980-99</b>:  The economy and Wall Street rise and fall in the 80s. Restrained optimism leads to few large developments with some exceptions such as the Trump Tower in 1983.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 1999][yearbuilt > 1979]{polygon-fill: #FFEDBC;}[yearbuilt >= 2000]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "2000",
+            info: "<p><b>2000-14</b>:  Urban redevelopment surges as a steady flow of young adults relocate to NYC. Glass curtain buildings replace old tenements. The demand for affordable housing continues to increase.<p>", 
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 2000][yearbuilt > 1980]{polygon-fill: #FFEDBC;} [yearbuilt <= 2000][yearbuilt > 1999]{polygon-fill: #FFF;}[yearbuilt >= 2001]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "2001",
+            info: "<p><b>2000-14</b>:  Urban redevelopment surges as a steady flow of young adults relocate to NYC. Glass curtain buildings replace old tenements. The demand for affordable housing continues to increase.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 2000][yearbuilt > 1980]{polygon-fill: #FFEDBC;} [yearbuilt <= 2001][yearbuilt > 1999]{polygon-fill: #FFF;}[yearbuilt >= 2002]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "2002",
+            info: "<p><b>2000-14</b>:  Urban redevelopment surges as a steady flow of young adults relocate to NYC. Glass curtain buildings replace old tenements. The demand for affordable housing continues to increase.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 2000][yearbuilt > 1980]{polygon-fill: #FFEDBC;} [yearbuilt <= 2002][yearbuilt > 1999]{polygon-fill: #FFF;}[yearbuilt >= 2003]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "2003",
+            info: "<p><b>2000-14</b>:  Urban redevelopment surges as a steady flow of young adults relocate to NYC. Glass curtain buildings replace old tenements. The demand for affordable housing continues to increase.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 2000][yearbuilt > 1980]{polygon-fill: #FFEDBC;} [yearbuilt <= 2003][yearbuilt > 1999]{polygon-fill: #FFF;}[yearbuilt >= 2004]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "2004",
+            info: "<p><b>2000-14</b>:  Urban redevelopment surges as a steady flow of young adults relocate to NYC. Glass curtain buildings replace old tenements. The demand for affordable housing continues to increase.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 2000][yearbuilt > 1980]{polygon-fill: #FFEDBC;} [yearbuilt <= 2004][yearbuilt > 1999]{polygon-fill: #FFF;}[yearbuilt >= 2005]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "2005",
+            info: "<p><b>2000-14</b>:  Urban redevelopment surges as a steady flow of young adults relocate to NYC. Glass curtain buildings replace old tenements. The demand for affordable housing continues to increase.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 2000][yearbuilt > 1980]{polygon-fill: #FFEDBC;} [yearbuilt <= 2005][yearbuilt > 1999]{polygon-fill: #FFF;}[yearbuilt >= 2006]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "2006",
+            info: "<p><b>2000-14</b>:  Urban redevelopment surges as a steady flow of young adults relocate to NYC. Glass curtain buildings replace old tenements. The demand for affordable housing continues to increase.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 2000][yearbuilt > 1980]{polygon-fill: #FFEDBC;} [yearbuilt <= 2006][yearbuilt > 1999]{polygon-fill: #FFF;}[yearbuilt >= 2007]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "2007",
+            info: "<p><b>2000-14</b>:  Urban redevelopment surges as a steady flow of young adults relocate to NYC. Glass curtain buildings replace old tenements. The demand for affordable housing continues to increase.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 2000][yearbuilt > 1980]{polygon-fill: #FFEDBC;} [yearbuilt <= 2007][yearbuilt > 1999]{polygon-fill: #FFF;}[yearbuilt >= 2008]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "2008",
+            info: "<p><b>2000-14</b>:  Urban redevelopment surges as a steady flow of young adults relocate to NYC. Glass curtain buildings replace old tenements. The demand for affordable housing continues to increase.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 2000][yearbuilt > 1980]{polygon-fill: #FFEDBC;} [yearbuilt <= 2008][yearbuilt > 1999]{polygon-fill: #FFF;}[yearbuilt >= 2009]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "2009",
+            info: "<p><b>2000-14</b>:  Urban redevelopment surges as a steady flow of young adults relocate to NYC. Glass curtain buildings replace old tenements. The demand for affordable housing continues to increase.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 2000][yearbuilt > 1980]{polygon-fill: #FFEDBC;} [yearbuilt <= 2009][yearbuilt > 1999]{polygon-fill: #FFF;}[yearbuilt >= 2010]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "2010",
+            info: "<p><b>2000-14</b>:  Urban redevelopment surges as a steady flow of young adults relocate to NYC. Glass curtain buildings replace old tenements. The demand for affordable housing continues to increase.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 2000][yearbuilt > 1980]{polygon-fill: #FFEDBC;} [yearbuilt <= 2010][yearbuilt > 1999]{polygon-fill: #FFF;}[yearbuilt >= 2011]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "2011",
+            info: "<p><b>2000-14</b>:  Urban redevelopment surges as a steady flow of young adults relocate to NYC. Glass curtain buildings replace old tenements. The demand for affordable housing continues to increase.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 2000][yearbuilt > 1980]{polygon-fill: #FFEDBC;} [yearbuilt <= 2011][yearbuilt > 1999]{polygon-fill: #FFF;}[yearbuilt >= 2012]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "2012",
+            info: "<p><b>2000-14</b>:  Urban redevelopment surges as a steady flow of young adults relocate to NYC. Glass curtain buildings replace old tenements. The demand for affordable housing continues to increase.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 2000][yearbuilt > 1980]{polygon-fill: #FFEDBC;} [yearbuilt <= 2012][yearbuilt > 1999]{polygon-fill: #FFF;}[yearbuilt >= 2013]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "2013",
+            info: "<p><b>2000-14</b>:  Urban redevelopment surges as a steady flow of young adults relocate to NYC. Glass curtain buildings replace old tenements. The demand for affordable housing continues to increase.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 2000][yearbuilt > 1980]{polygon-fill: #FFEDBC;} [yearbuilt <= 2013][yearbuilt > 1999]{polygon-fill: #FFF;}[yearbuilt >= 2014]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "2014",
+            info: "<p><b>2000-14</b>:  Urban redevelopment surges as a steady flow of young adults relocate to NYC. Glass curtain buildings replace old tenements. The demand for affordable housing continues to increase.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+			options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 2000][yearbuilt > 1980]{polygon-fill: #FFEDBC;} [yearbuilt <= 2014][yearbuilt > 1999]{polygon-fill: #FFF;}[yearbuilt >= 2015]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "2014",
+            info: "<p><b>2000-14</b>:  Urban redevelopment surges as a steady flow of young adults relocate to NYC. Glass curtain buildings replace old tenements. The demand for affordable housing continues to increase.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+            options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 2000][yearbuilt > 1980]{polygon-fill: #FFEDBC;} [yearbuilt <= 2014][yearbuilt > 1999]{polygon-fill: #FFF;}[yearbuilt >= 2015]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		  {
+            headline: "2014",
+            info: "<p><b>2000-14</b>:  Urban redevelopment surges as a steady flow of young adults relocate to NYC. Glass curtain buildings replace old tenements. The demand for affordable housing continues to increase.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+            options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 2000][yearbuilt > 1980]{polygon-fill: #FFEDBC;} [yearbuilt <= 2014][yearbuilt > 1999]{polygon-fill: #FFF;}[yearbuilt >= 2015]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "2014",
+            info: "<p><b>2000-14</b>:  Urban redevelopment surges as a steady flow of young adults relocate to NYC. Glass curtain buildings replace old tenements. The demand for affordable housing continues to increase.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+            options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 2000][yearbuilt > 1980]{polygon-fill: #FFEDBC;} [yearbuilt <= 2014][yearbuilt > 1999]{polygon-fill: #FFF;}[yearbuilt >= 2015]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "2014",
+            info: "<p><b>2000-14</b>:  Urban redevelopment surges as a steady flow of young adults relocate to NYC. Glass curtain buildings replace old tenements. The demand for affordable housing continues to increase.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+            options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 2000][yearbuilt > 1980]{polygon-fill: #FFEDBC;} [yearbuilt <= 2014][yearbuilt > 1999]{polygon-fill: #FFF;}[yearbuilt >= 2015]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "2014",
+            info: "<p><b>2000-14</b>:  Urban redevelopment surges as a steady flow of young adults relocate to NYC. Glass curtain buildings replace old tenements. The demand for affordable housing continues to increase.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+            options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 2000][yearbuilt > 1980]{polygon-fill: #FFEDBC;} [yearbuilt <= 2014][yearbuilt > 1999]{polygon-fill: #FFF;}[yearbuilt >= 2015]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "2014",
+            info: "<p><b>2000-14</b>:  Urban redevelopment surges as a steady flow of young adults relocate to NYC. Glass curtain buildings replace old tenements. The demand for affordable housing continues to increase.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+            options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 2000][yearbuilt > 1980]{polygon-fill: #FFEDBC;} [yearbuilt <= 2014][yearbuilt > 1999]{polygon-fill: #FFF;}[yearbuilt >= 2015]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		  {
+            headline: "2014",
+            info: "<p><b>2000-14</b>:  Urban redevelopment surges as a steady flow of young adults relocate to NYC. Glass curtain buildings replace old tenements. The demand for affordable housing continues to increase.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+            options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 2000][yearbuilt > 1980]{polygon-fill: #FFEDBC;} [yearbuilt <= 2014][yearbuilt > 1999]{polygon-fill: #FFF;}[yearbuilt >= 2015]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "2014",
+            info: "<p><b>2000-14</b>:  Urban redevelopment surges as a steady flow of young adults relocate to NYC. Glass curtain buildings replace old tenements. The demand for affordable housing continues to increase.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+            options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 2000][yearbuilt > 1980]{polygon-fill: #FFEDBC;} [yearbuilt <= 2014][yearbuilt > 1999]{polygon-fill: #FFF;}[yearbuilt >= 2015]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        },
+		
+		 {
+            headline: "2014",
+            info: "<p><b>2000-14</b>:  Urban redevelopment surges as a steady flow of young adults relocate to NYC. Glass curtain buildings replace old tenements. The demand for affordable housing continues to increase.<p>",
+            viz: "https://timothymartin76.cartodb.com/api/v2/viz/3191972e-49f1-11e5-8f88-0e9d821ea90d/viz.json", 
+            options: [
+                {                  
+                   cartocss: "#layer{[yearbuilt <= 1920]{polygon-fill: #57385C;} [yearbuilt <= 1940][yearbuilt > 1920]{polygon-fill: #A75265;}[yearbuilt <= 1960][yearbuilt > 1940]{polygon-fill: #EC7263;} [yearbuilt <= 1980][yearbuilt > 1960]{polygon-fill: #FEBE7E;} [yearbuilt <= 2000][yearbuilt > 1980]{polygon-fill: #FFEDBC;} [yearbuilt <= 2014][yearbuilt > 1999]{polygon-fill: #FFF;}[yearbuilt >= 2015]{polygon-fill: #000000;}}"
+                }
+            ],
+            id: 1,
+            xy: [40.740044, -73.983554],
+            z: 14
+        }
+
+      ]
+
+      if(window.location.hash) {
+        var hash_value = window.location.hash.replace('#', '');
+         if (parseInt(hash_value) > 0) {
+             if (hash_value < tour.length) {
+                next = parseInt(hash_value)
+             }
+         }
+         
+      }
+
+	  
+      last = next-1;
+      move();
+
+      $('#next').click(function(){
+        clearTimeout(nextTimer);
+        move();
+      });
+
+      $('#back').click(function(){
+        console.log(next)
+        clearTimeout(nextTimer);
+        if (next==0) next = tour.length;
+        next = next-2;
+        if (next<0) next = tour.length-1;
+        move();
+      });
+	  	
+	  
+   </script>
+  </body>
+</html>
